@@ -1,4 +1,9 @@
-module Conllu.Type where
+module Conllu.Type
+    (module Conllu.Type
+--    , module CoreNLP.DEPcodes
+--    , module NLP.Corpora.UD   -- conflicting exports
+    )
+    where
 
 ---
 -- imports
@@ -11,6 +16,10 @@ import Data.List
 import Data.Maybe
 import Data.Ord
 import Data.Tree
+
+import  NLP.Corpora.UD
+import CoreNLP.DEPcodes
+import Uniform.Strings
 
 ---
 -- type and data declarations
@@ -62,83 +71,94 @@ type Index   = Int
 type IxSep   = Char
 type Form    = Maybe String
 type Lemma   = Maybe String
-type PosTag  = Maybe Pos
+type PosTag  = Maybe POStag
 type Xpostag = Maybe String
 type Feats   = [StringPair]
 type Dephead = Maybe Index
-type DepRel  = Maybe (Dep,Subtype)
-type Subtype = String
-type Deps    = [(Index,(Dep,Subtype))]
+type DepRel  = Maybe DepCode -- Maybe (DepCode1,Subtype)
+--type Subtype = String
+type Deps    = [(Index, DepCode)] -- [(Index,(DepCode1,Subtype))]
 type Misc    = Maybe String
 
-_dep :: Token -> Maybe Dep
-_dep = dep . _deprel
+_dep :: Token -> Maybe DepCode1
+_dep = dep .  _deprel  -- should return UNK
   where
-    dep (Just (dr,_)) = Just dr
+    dep (Just depcode) = Just . d1 $ depcode
     dep _ = Nothing
 
-depIs :: Dep -> Token -> Bool
-depIs d = maybe False (\d' -> d == d') . _dep
+depIs :: DepCode1  -> Token -> Bool
+depIs d = maybe False (\d' -> d == d1 d') . _deprel
 
-data Dep
-  = ACL
-  | ADVCL
-  | ADVMOD
-  | AMOD
-  | APPOS
-  | AUX
-  | CASE
-  | CC
-  | CCOMP
-  | CLF
-  | COMPOUND
-  | CONJ
-  | COP
-  | CSUBJ
-  | DEP
-  | DET
-  | DISCOURSE
-  | DISLOCATED
-  | EXPL
-  | FIXED
-  | FLAT
-  | GOESWITH
-  | IOBJ
-  | LIST
-  | MARK
-  | NMOD
-  | NSUBJ
-  | NUMMOD
-  | OBJ
-  | OBL
-  | ORPHAN
-  | PARATAXIS
-  | PUNCT
-  | REPARANDUM
-  | ROOT
-  | VOCATIVE
-  | XCOMP
-  deriving (Eq, Read, Show)
-
-data Pos
-  = ADJ
-  | ADP
-  | ADV
-  | AUXpos -- pos because there is an aux in deprel
-  | CCONJ
-  | DETpos
-  | INTJ
-  | NOUN
-  | NUM
-  | PART
-  | PRON
-  | PROPN
-  | PUNCTpos
-  | SCONJ
-  | SYM
-  | VERB
-  | X
-  deriving (Eq, Read, Show)
+--data DepCode1  = ACL
+--                | ADVCL
+--                | ADVMOD
+--                | AMOD
+--                | APPOS
+--                | AUX
+--                | AUXPASS
+--                | CASE
+--                | CLF -- from hs-conllu
+--                | CC  -- was CC but gives conflict with Conll.Tag
+--                | CCOMP
+--                | COMPOUND
+--                | CONJ
+--                | COP
+--                | CSUBJ
+--                | CSUBJPASS
+--                | DEP
+--                | DET
+--                | DISCOURSE
+--                | DISLOCATED
+--                | DOBJ
+--                | EXPL
+--                | FLAT -- from hs-conllu
+--                | FOREIGN
+--                | GOESWITH
+--                | IOBJ
+--                | LIST
+--                | MARK
+--                | MWE
+--                | NAME
+--                | NEG
+--                | NMOD
+--                | NSUBJ
+--                | NSUBJPASS
+--                | NUMMOD
+--                | OBL -- from hs-conllu
+--                | ORPHAN -- from hs-conllu
+--                | PARATAXIS
+--                | PUNCT
+--                | REF   -- ??
+--                | REMNANT
+--                | REPARANDUM
+--                | ROOT
+--                | VOCATIVE
+--                | XCOMP
+--                | DepUnk
+--
+--        deriving (Show, Read, Eq, Ord, Enum, Bounded)
+--
+--data POStag
+--  = ADJ
+--  | ADP
+--  | ADV
+--  | AUXpos -- pos because there is an aux in deprel
+--  -- probably better to make to modules
+--  -- and import qualified
+--  | CCONJ
+--  | DETpos
+--  | INTJ
+--  | NOUN
+--  | NUM
+--  | PART
+--  | PRON
+--  | PROPN
+--  | PUNCTpos
+--  | SCONJ
+--  | SYM
+--  | VERB
+--  | X
+--  deriving (Eq, Read, Show)
 
 -- trees
 type TTree  = Tree Token -- only STokens
@@ -148,15 +168,21 @@ type ETree = (TTree, [Token]) -- enhanced tree
 
 ---
 -- constructor functions
-mkDep :: String -> Dep
-mkDep = read . upcaseStr
+--mkDep :: String -> DepCode1
+--mkDep = read . upcaseStr
+--
+--mkDep2 :: String -> DepCode2
+--mkDep2 = read . upcaseStr
 
-mkPos :: String -> Pos
+mkDepCode :: String -> DepCode
+mkDepCode = readDepCode . s2t
+
+mkPos :: String -> POStag
 mkPos = mkPos' . upcaseStr
   where
-    mkPos' "AUX" = AUXpos
-    mkPos' "DET" = DETpos
-    mkPos' "PUNCT" = PUNCTpos
+--    mkPos' "AUX" = AUXpos
+--    mkPos' "DET" = DETpos
+--    mkPos' "PUNCT" = PUNCTpos
     mkPos' pos = read pos
 
 -- tokens
@@ -238,7 +264,7 @@ actOnSentTks f s@Sentence{_tokens=tks} = s{_tokens=f tks}
 
 actOnDocTks :: ([Token] -> [Token]) -> Document -> Document
 actOnDocTks f d@Document {_sents = ss} =
-  d {_sents = map (actOnSentTks f) ss}  
+  d {_sents = map (actOnSentTks f) ss}
 
 sentTksByType :: Sentence -> ([Token],[Token])
 -- ([SToken],[metaTokens:EToken,MToken])

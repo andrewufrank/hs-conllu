@@ -7,6 +7,9 @@ import qualified Data.Map.Strict as M
 import Data.Tree
 import Data.Maybe
 
+import  NLP.Corpora.UD
+import CoreNLP.DEPcodes
+
 isRoot :: Token -> Bool
 isRoot = depIs ROOT
 
@@ -20,9 +23,9 @@ sTksToTTree ts =
   let (Just rt) = find isRoot ts
       dm = tksDepMap ts
   in rootToTTree rt dm
-  where
-    rootToTTree :: Token -> M.Map Index [Token] -> TTree
-    rootToTTree t m =
+
+rootToTTree :: Token -> M.Map Index [Token] -> TTree
+rootToTTree t m =
       Node t $
       map (`rootToTTree` m) $ fromMaybe [] $ M.lookup (_ix t) m
 

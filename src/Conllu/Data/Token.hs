@@ -11,8 +11,12 @@ import Data.List
 import Data.Maybe
 import Data.Tree
 
+import  NLP.Corpora.UD
+import CoreNLP.DEPcodes
+
+
 -- tokens
-_depU :: Token -> Dep
+_depU :: Token -> DepCode1
 _depU = mkU _dep
 
 _depheadU :: Token -> Index
@@ -31,10 +35,10 @@ getIxSubTree i tt = head $ getSubTreesBy (\t -> i == _ix t) tt
 rmIxSubTree :: Index -> TTree -> TTree
 rmIxSubTree i tt = fromJust $ rmSubTreesBy (\t -> i == _ix t) tt
 
-getDepSubTrees :: Dep -> TTree -> [TTree]
+getDepSubTrees :: DepCode1 -> TTree -> [TTree]
 getDepSubTrees d = getSubTreesBy (depIs d)
 
-getDepTks :: Dep -> [Token] -> [Token]
+getDepTks :: DepCode1 -> [Token] -> [Token]
 getDepTks d = filter $ depIs d
 
 linTTree :: TTree -> [Token]
@@ -70,7 +74,7 @@ rmSubTreesBy p = foldTree a
     a r f = -- Node r f : r = root, f = forest
       if p r
         then Nothing
-        else Just (Node r $ catMaybes f)        
+        else Just (Node r $ catMaybes f)
 
 lin :: (a -> a -> Ordering) -> Tree a -> [a]
 lin f t = sortBy f $ flatten t

@@ -13,6 +13,9 @@ import           Data.Monoid
 import           System.Environment
 import           System.FilePath
 
+import  NLP.Corpora.UD as UD
+import CoreNLP.DEPcodes as DEP
+
 -- TODO: generalize types
 -- TODO: use foldable instance
 
@@ -100,8 +103,10 @@ correctTkHead hi t@SToken{} = t {_dephead = Just hi}
 correctToken _hi t = t
 
 correctTkDep :: Token -> Token
-correctTkDep t@SToken {_deprel = Just (dep, _)} =
-  t {_deprel = Just (FLAT, "name")}
+correctTkDep t@SToken {_deprel = Just (DepCode ty subty)} =
+  t {_deprel = Just (DepCode ty Dep2zero)}
+--correctTkDep t@SToken {_deprel = Just (dep, _)} =
+--  t {_deprel = Just (FLAT, "name")}
 correctTkDep t = t
 
 correctLex
@@ -133,7 +138,7 @@ correctTks tt tks =
   in correctLex
        as
        (\i tk ->
-          if _dep tk `notElem` map Just [DET, PUNCT, CASE]
+          if _dep tk `notElem` map Just [DEP.DET, DEP.PUNCT, DEP.CASE]
             then correctTkDep $ correctTkHead i tk
             else tk)
        correctTkHead

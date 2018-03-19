@@ -27,6 +27,9 @@ import qualified Text.Megaparsec as M
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
+import  NLP.Corpora.UD
+import CoreNLP.DEPcodes
+
 type Parser = M.Parsec Void String
 
 ---
@@ -94,7 +97,7 @@ lemma = orEmpty stringWSpaces M.<?> "LEMMA"
 upostag :: Parser PosTag
 upostag = maybeEmpty upostag' M.<?> "UPOSTAG"
   where
-    upostag' :: Parser Pos
+    upostag' :: Parser POStag
     upostag' = liftM mkPos stringWOSpaces
 
 xpostag :: Parser Xpostag
@@ -106,18 +109,24 @@ feats = listP (listPair "=" (stringNot "=") (stringNot "\t|") M.<?> "feature pai
 dephead :: Parser Dephead
 dephead = maybeEmpty index M.<?> "HEAD"
 
-deprel :: Parser DepRel
-deprel = maybeEmpty deprel'
+deprel :: Parser (Maybe DepCode)
+deprel =  maybeEmpty deprel'
 
-deprel' :: Parser (Dep, Subtype)
+deprel' :: Parser DepCode -- (DepCode1, Subtype)
 deprel' = do
-  dep <- lexeme dep M.<?> "DEPREL"
-  st <- M.option [] $ symbol ":" *> (letters M.<?> "DEPREL subtype")
-  return (dep, st)
+  depR <- lexeme depCodeP M.<?> "DEPREL"
+--  dep2R <- M.option [] $ symbol ":" *> (lexeme dep2 M.<?> "DEPREL subtype")
+--  st <- M.option [] $ symbol ":" *> (letters M.<?> "DEPREL subtype")
+  return  depR -- $ DepCode depR dep2R  -- (dep, st)
   where
     letters = lexeme $ M.some letterChar
-    dep :: Parser Dep
-    dep = liftM mkDep letters
+--    dep :: Parser DepCode1
+--    dep = liftM mkDep letters
+--    dep2 :: Parser DepCode2
+--    dep2 = liftM mkDep2 letters
+    depCodeP :: Parser DepCode
+    depCodeP = liftM mkDepCode letters
+
 
 deps :: Parser Deps
 deps = listP (listPair ":" index deprel' M.<?> "DEPS pair")

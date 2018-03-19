@@ -7,6 +7,9 @@ import Data.List
 import Data.Maybe
 import Data.Monoid
 
+import CoreNLP.DEPcodes
+import Uniform.Strings
+
 -- TODO: use some kind of bi-directional thing to derive this module
 
 ---
@@ -15,12 +18,12 @@ newtype DiffList a = DiffList { getDiffList :: [a] -> [a] }
 
 instance Monoid (DiffList a) where
   mempty = DiffList (\xs -> [] ++ xs)
-  (DiffList f) `mappend` (DiffList g) = DiffList (f . g) 
+  (DiffList f) `mappend` (DiffList g) = DiffList (f . g)
 
-toDiffList :: [a] -> DiffList a  
-toDiffList xs = DiffList (xs++)  
-  
-fromDiffList :: DiffList a -> [a]  
+toDiffList :: [a] -> DiffList a
+toDiffList xs = DiffList (xs++)
+
+fromDiffList :: DiffList a -> [a]
 fromDiffList (DiffList f) = f []
 
 ---
@@ -32,7 +35,7 @@ printSent :: Sentence -> DiffList Char
 printSent ss =
   mconcat
     [ printComments (_meta ss)
-    , diffLSpace
+--    , diffLSpace   -- causes an extra space initially -- af
     , printTks (_tokens ss)
     , diffLSpace
     ]
@@ -113,20 +116,23 @@ printTk t = printTk' t
              then ""
              else "=" ++ v) .
       _feats
-    printDeps =
-      printList (\(i, dr) -> show i ++ ":" ++ printDeprel dr) . _deps
-    printDeprel (d, s) =
-      downcaseStr (show d) ++
-      if null s
-        then ""
-        else ":" ++ s
+    printDeps tk = toUpper' .   concat $ map (\d ->  show (fst d)  ++  ":" ++ printDeprel (snd d)) (_deps tk)
+--        where d = _deps tk
+--      printList (\(i, dr) -> show i ++ ":" ++ printDeprel dr) . _deps
+    printDeprel depcode = t2s $ fromDEPtag depcode
+--      downcaseStr (show d) ++
+--      if null s
+--        then ""
+--        else ":" ++ s
     printMisc = fromMaybe "_" . _misc
     emptyF t = "_"
 
+--cross (f,g) (a,b) = (f a, g b)
+
 printPos :: PosTag -> String
-printPos (Just AUXpos) = "AUX"
-printPos (Just DETpos) = "DET"
-printPos (Just PUNCTpos) = "PUNCT"
+--printPos (Just AUXpos) = "AUX"
+--printPos (Just DETpos) = "DET"
+--printPos (Just PUNCTpos) = "PUNCT"
 printPos Nothing = "_"
 printPos (Just _pos) = show _pos
 
