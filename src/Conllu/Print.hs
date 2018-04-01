@@ -7,7 +7,8 @@ import Data.List
 import Data.Maybe
 import Data.Monoid
 
-import CoreNLP.DEPcodes
+--import  NLP.TagSets.UD
+import NLP.TagSets.DEPcodes
 import Uniform.Strings
 
 -- TODO: use some kind of bi-directional thing to derive this module

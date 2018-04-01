@@ -1,5 +1,5 @@
 name:                Hs-conllu
-version:             0.0.1
+version:             0.0.1.2
 synopsis:            Conllu validating parser and utils.
 -- description:
 homepage:            https://github.com/odanoburu/hs-conllu

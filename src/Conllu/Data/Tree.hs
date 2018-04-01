@@ -7,8 +7,8 @@ import qualified Data.Map.Strict as M
 import Data.Tree
 import Data.Maybe
 
-import  NLP.Corpora.UD
-import CoreNLP.DEPcodes
+import  NLP.TagSets.UD
+import NLP.TagSets.DEPcodes
 
 isRoot :: Token -> Bool
 isRoot = depIs ROOT

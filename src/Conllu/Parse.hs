@@ -27,8 +27,8 @@ import qualified Text.Megaparsec as M
 import           Text.Megaparsec.Char
 import qualified Text.Megaparsec.Char.Lexer as L
 
-import  NLP.Corpora.UD
-import CoreNLP.DEPcodes
+import  NLP.TagSets.UD
+import NLP.TagSets.DEPcodes
 
 type Parser = M.Parsec Void String
 

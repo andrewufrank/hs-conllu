@@ -11,8 +11,8 @@ import Data.List
 import Data.Maybe
 import Data.Tree
 
-import  NLP.Corpora.UD
-import CoreNLP.DEPcodes
+import  NLP.TagSets.UD
+import NLP.TagSets.DEPcodes
 
 
 -- tokens

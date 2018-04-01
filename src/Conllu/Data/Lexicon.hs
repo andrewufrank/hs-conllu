@@ -13,8 +13,8 @@ import           Data.Monoid
 import           System.Environment
 import           System.FilePath
 
-import  NLP.Corpora.UD as UD
-import CoreNLP.DEPcodes as DEP
+import  NLP.TagSets.UD as US
+import NLP.TagSets.DEPcodes as DEP
 
 -- TODO: generalize types
 -- TODO: use foldable instance

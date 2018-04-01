@@ -17,8 +17,8 @@ import Data.Maybe
 import Data.Ord
 import Data.Tree
 
-import  NLP.Corpora.UD
-import CoreNLP.DEPcodes
+import  NLP.TagSets.UD
+import NLP.TagSets.DEPcodes
 import Uniform.Strings
 
 ---
