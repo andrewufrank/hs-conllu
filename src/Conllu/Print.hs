@@ -1,3 +1,6 @@
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances  #-}
+
 module Conllu.Print where
 
 import Conllu.Type
@@ -17,7 +20,9 @@ import Uniform.Strings
 -- DiffList type from LYHGG
 newtype DiffList a = DiffList { getDiffList :: [a] -> [a] }
 
-instance Monoid (DiffList a) where
+instance Semigroup (DiffList a) where
+  (DiffList f) <> (DiffList g) = DiffList (f . g)
+instance Semigroup (DiffList a) => Monoid (DiffList a) where
   mempty = DiffList (\xs -> [] ++ xs)
   (DiffList f) `mappend` (DiffList g) = DiffList (f . g)
 
